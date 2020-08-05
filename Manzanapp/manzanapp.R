@@ -8,7 +8,7 @@ library(proto)
 library(RSQLite)
 
 create_token ( 
-  app = "Servidor 4", 
+  app = "Servidor 45", 
   consumer_key = "ZjttWCOfpdwJIN0F5D3dlJnhl", 
   consumer_secret = "oezJcsjHKxQ4LqmHrrK1CoRwRPAeaaUEMJnLfyaGtYaf9nv4Ct", 
   access_token = "3089952580-pAyIkkGaoRL7X1TjJIXAnPvUTuAXDXAmC5Q5y6x", 
