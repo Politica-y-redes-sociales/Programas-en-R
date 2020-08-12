@@ -14,8 +14,10 @@ ui <- fluidPage(
                 div(img(src = "Logo observatorio.png", heigth = 100, width = 120,align ="center"),
                     style="text-align: center;"),
                 hr(),
+                icon("user"),
                 textInput("usuario","Usuario"),
-                textInput("contraseña","Contraseña"),
+                icon("bed"),
+                passwordInput("contraseña","Contraseña"),
                 submitButton("Ingresar"),
                 hr(),
                 fileInput(inputId ="carga", 
@@ -31,6 +33,10 @@ ui <- fluidPage(
         
         mainPanel(
           h3("Panel de insumos"),
+          fluidRow(
+            column(5,
+                   tableOutput("vista"))
+          ),
           hr(),
           h4("Datos del archivo"),
           fluidRow(
@@ -43,12 +49,7 @@ ui <- fluidPage(
                    checkboxGroupInput("check", label = h4("Programas elegidos"), 
                                       choices = list("Choice 1" = 1, "Choice 2" = 2, "Choice 3" = 3), selected = NULL)),
             ),
-
-          fluidRow(
-            column(5,
-                   tableOutput("vista"))
-          ),
-          downloadLink('descarga', 'Download source')
+          downloadButton('descarga', 'Descargar archivo')
         )
     )
 )
@@ -56,6 +57,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input,output) 
 {
+  
   output$tabla <- renderTable({
     Entrada <- input$carga
     if(is.null(Entrada)){
@@ -65,7 +67,7 @@ server <- function(input,output)
     }
   })
   
-  #Se lee el Archivo 
+  #Lectura del archivo
   archivo_csv <- reactive({
     datos_csv <- input$carga
     if(is.null(datos_csv)){
@@ -86,9 +88,16 @@ server <- function(input,output)
                       GROUP BY retweet_screen_name 
                       ORDER BY COUNT(retweet_screen_name) DESC
                       LIMIT 5"), silent =TRUE)
-      }
+    }
   })
   
+  #Descarga de archivos 
+  output$descarga<-downloadHandler(filename <- function() {paste0("tabla_",'Archivo','.csv')},
+                                   content <- function(file){
+                                     ## ejemplo
+                                     res <- nrow(archivo_csv())
+                                     write.csv2(res, file)
+                                   })
   
 }
 # Run the application 
