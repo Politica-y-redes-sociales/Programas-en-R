@@ -1,9 +1,8 @@
 #install.packages("attempt")
-#Actalizacion de paquetes 
 #update.packages()
-
+#install.packages("sqldf")
 library(readr)
-library(dplyr)#manejo de ficheros
+library(dplyr)
 library(purrr)
 library(tidyr)
 library(stringr)
@@ -12,6 +11,9 @@ library(tm)
 library(colorspace)
 library(plotly)
 library(sqldf)
+
+Sys.getlocale()
+Sys.setlocale("LC_ALL", "es_ES.UTF-8")
 
 carpeta = "/Users/alfonsoopazom/Desktop/Observatorio/ProgramasenR/Todo en un Cipolapp"
 carpeta_base = paste(carpeta,"Bases",sep="/")
@@ -22,7 +24,7 @@ pat ="(RT|via)(((?:\\b\\W*|)@\\w+)+)|,|:|(https|http)://t.co/[A-Za-z\\d]+|&amp;|
 patref ="@[A-Za-z0-9]*[^\\s:_.<]"
 patref2 ='c("[A-Za-z0-9áéíóú]*")'
 patHashtag="#[A-Za-z0-9áéíóú]*"
-pat3 = "[A-Za-záéíóú0-9_$]*[^\\s\\t]"
+pat3 = "[A-Za-z0-9_]+"
 
 Sys.setenv("plotly_username"="observatorio2019")
 Sys.setenv("plotly_api_key"="BObHnm3fSEoIg5SCk3a2")
@@ -121,23 +123,21 @@ while(i <= numArchivos)
   #--- Data frame de la base ---#
   aux <- read.csv(archivo_temporal,header = TRUE,sep = ",",encoding = "UTF-7")
   aux <- as.data.frame(aux)
-
+ 
   #--- Arreglo de los tildes ---#
-  aux$hashtags=gsub('<f1>','ñ',aux$hashtags)#ñ
-  aux$hashtags=gsub('<e1>','á',aux$hashtags)#a
-  aux$hashtags=gsub('<c1>','Á',aux$hashtags)#A
-  aux$hashtags=gsub("<e9>","é",aux$hashtags)#e
-  aux$hashtags=gsub("<c9>","É",aux$hashtags)#E
-  aux$hashtags=gsub("<ed>","í",aux$hashtags)#i
-  aux$hashtags=gsub("<cd>","Í",aux$hashtags)#I
-  aux$hashtags=gsub('<f3>','ó',aux$hashtags)#o
-  aux$hashtags=gsub("<d3>","Ó",aux$hashtags)#O
-  aux$hashtags=gsub("<da>","Ú",aux$hashtags)#U
-  aux$hashtags=gsub("<fa>","ú",aux$hashtags)#u
-  aux$hashtags=gsub("<40>","@",aux$hashtags)#@
-  aux$hashtags=gsub("<61>","=",aux$hashtags)#@
-
-  #mode(aux$hashtags)
+  aux$hashtags=gsub("\xf1",'ñ',aux$hashtags)#ñ
+  aux$hashtags=gsub("\xe1","a",aux$hashtags)#a
+  aux$hashtags=gsub("\xc1",'Á',aux$hashtags)#A
+  aux$hashtags=gsub("\xe9","é",aux$hashtags)#e
+  aux$hashtags=gsub("\xc9","É",aux$hashtags)#E
+  aux$hashtags=gsub("\xed","í",aux$hashtags)#i
+  aux$hashtags=gsub("\xcd","Í",aux$hashtags)#I
+  aux$hashtags=gsub("\xf3",'ó',aux$hashtags)#o
+  aux$hashtags=gsub("\xd3","Ó",aux$hashtags)#O
+  aux$hashtags=gsub("\xda","Ú",aux$hashtags)#U
+  aux$hashtags=gsub("\xfa","ú",aux$hashtags)#u
+  aux$hashtags=gsub("\x40","@",aux$hashtags)#@
+  aux$hashtags=gsub("[^0-9A-Za-z///' ]","",aux$hashtags)#@
   
   #--- Eliminacion de tildes ---#
   aux$text=gsub("á","a",aux$text)
@@ -275,7 +275,8 @@ while(i <= numArchivos)
                             FROM hashtags
                             GROUP BY Hashtag
                             ORDER BY Cantidad
-                            DESC LIMIT 50"), silent = TRUE)
+                            DESC LIMIT 50"))
+  
   try(cantidad_hashtag <- sqldf("SELECT count(hashtags) 'Porcentaje Hashtags'
                             FROM aux WHERE hashtags!=''"),silent = TRUE)
   try(porcentaje_hashtags <-round((cantidad_hashtag/total_filas)*100,2),silent = TRUE)
