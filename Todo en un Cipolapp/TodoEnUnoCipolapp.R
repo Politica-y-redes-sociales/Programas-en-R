@@ -1,7 +1,7 @@
 #install.packages("attempt")
 #Actalizacion de paquetes 
 #update.packages()
-library(attempt)
+
 library(readr)
 library(dplyr)#manejo de ficheros
 library(purrr)
@@ -118,24 +118,26 @@ while(i <= numArchivos)
   nombre_carpeta = paste(carpeta,"Resultados",sep = "/")
   archivo_temporal = paste(carpeta_base,toString(nombres$nombres[i]),sep="/")
   nombreResultado = nombres$nombres[i]
+  #--- Data frame de la base ---#
+  aux <- read.csv(archivo_temporal,header = TRUE,sep = ",",encoding = "UTF-7")
+  aux <- as.data.frame(aux)
 
   #--- Arreglo de los tildes ---#
-  #consulta$text=gsub("<f1>","ñ",consulta$text)#ñ
-  #consulta$text=gsub("<e1>","á",consulta$text)#a
-  #consulta$text=gsub("<c1>","Á",consulta$text)#A
-  #consulta$text=gsub("<e9>","é",consulta$text)#e
-  #consulta$text=gsub("<c9>","É",consulta$text)#E
-  #consulta$text=gsub("<ed>","í",consulta$text)#i
-  #consulta$text=gsub("<cd>","Í",consulta$text)#I
-  #consulta$text=gsub("<f3>","ó",consulta$text)#o
-  #consulta$text=gsub("<d3>","Ó",consulta$text)#O
-  #consulta$text=gsub("<da>","Ú",consulta$text)#U
-  #consulta$text=gsub("<fa>","ú",consulta$text)#u
-  #consulta$text=gsub("<40>","@",consulta$text)#@
-  
-  #--- Data frame de la base ---#
-  aux <- read.csv(archivo_temporal,header = TRUE,sep = ",",encoding = "UTF-8")
-  aux <- as.data.frame(aux)
+  aux$hashtags=gsub('<f1>','ñ',aux$hashtags)#ñ
+  aux$hashtags=gsub('<e1>','á',aux$hashtags)#a
+  aux$hashtags=gsub('<c1>','Á',aux$hashtags)#A
+  aux$hashtags=gsub("<e9>","é",aux$hashtags)#e
+  aux$hashtags=gsub("<c9>","É",aux$hashtags)#E
+  aux$hashtags=gsub("<ed>","í",aux$hashtags)#i
+  aux$hashtags=gsub("<cd>","Í",aux$hashtags)#I
+  aux$hashtags=gsub('<f3>','ó',aux$hashtags)#o
+  aux$hashtags=gsub("<d3>","Ó",aux$hashtags)#O
+  aux$hashtags=gsub("<da>","Ú",aux$hashtags)#U
+  aux$hashtags=gsub("<fa>","ú",aux$hashtags)#u
+  aux$hashtags=gsub("<40>","@",aux$hashtags)#@
+  aux$hashtags=gsub("<61>","=",aux$hashtags)#@
+
+  #mode(aux$hashtags)
   
   #--- Eliminacion de tildes ---#
   aux$text=gsub("á","a",aux$text)
@@ -240,7 +242,6 @@ while(i <= numArchivos)
   ungroup()
     
   write.csv(data_bigrama, file = paste( carpeta,"Resultados","DeterminantesSemanticos", "Bigrama","data_bigrama.csv",sep = "/"))
-  write.csv(data_bigrama, file = paste(carpeta,"Resultados", "ResultadosGenerales","data_bigramaA.csv",sep = "/"))
   
   # --- COMUNIDADES --- #
   # --- REFERENTES 2.0---#
@@ -253,7 +254,7 @@ while(i <= numArchivos)
                       ORDER BY Menciones
                       DESC LIMIT 50"), silent = TRUE)
   
-  write.csv(referentes, file = paste(carpeta,"Resultados","Comunidad","Referentes","referentes.csv",sep = "/"),row.names=FALSE)
+  try(write.csv(referentes, file = paste(carpeta,"Resultados","Comunidad","Referentes","referentes.csv",sep = "/"),row.names=FALSE), silent = TRUE)
   
   # --- INFLUENCIADORES --- #
   try(influenciadores <- sqldf("SELECT retweet_screen_name 'Usuario_Retweeado',count(retweet_screen_name) Cantidad_Retweet 
@@ -263,13 +264,12 @@ while(i <= numArchivos)
                       ORDER BY COUNT(retweet_screen_name) DESC
                       LIMIT 20"), silent =TRUE)
   
-  write.csv(influenciadores,file <- paste(carpeta,"Resultados","Comunidad","Influenciadores","Influenciadores.csv",sep = "/"),row.names = FALSE)
+  try(write.csv(influenciadores,file <- paste(carpeta,"Resultados","Comunidad","Influenciadores","Influenciadores.csv",sep = "/"),row.names = FALSE), silent = TRUE)
   
   # --- MOVILIZADORES --- #
   #attempt(hashtags <- str_to_lower(unlist(regmatches(aux$hashtags,gregexpr(pat3,aux$hashtags)))), msg = "Nope", verbose = TRUE)
-  try(hashtags <- str_to_lower(unlist(regmatches(aux$hashtags,gregexpr(pat3,aux$hashtags)))), silent = TRUE)
-  try(hashtags <- as.data.frame(hashtags),silent = TRUE)
-  
+  try(hashtags <- str_to_lower(unlist(regmatches(aux$hashtags,gregexpr(pat3,aux$hashtags)))))
+  try(hashtags <- as.data.frame(hashtags))
   
   try(ranking_hashtags <- sqldf("SELECT hashtags Hashtag, count(hashtags) Cantidad 
                             FROM hashtags
@@ -313,22 +313,22 @@ while(i <= numArchivos)
   try(write.csv(activistas, file = paste(carpeta,"Resultados","Comunidad","Activistas","Activistas.csv",sep = "/"),row.names = FALSE),silent = TRUE)
   
   # --- CONTENIDO MULTIMEDIA --- #
-  cantidad_link <- sqldf("SELECT COUNT(urls_url) 'Porcentaje Links' FROM aux WHERE urls_url NOT LIKE ''")
+  try(cantidad_link <- sqldf("SELECT COUNT(urls_url) 'Porcentaje Links' FROM aux WHERE urls_url NOT LIKE ''"), silent = TRUE)
  
-  ranking_url <- sqldf("SELECT urls_url Url, count(urls_url) Cantidad FROM aux
+  try(ranking_url <- sqldf("SELECT urls_url Url, count(urls_url) Cantidad FROM aux
                   WHERE urls_url NOT LIKE ''
                   GROUP BY urls_url
                   ORDER BY cantidad DESC
-                  LIMIT 5")
+                  LIMIT 5"), silent = TRUE)
   
-  cantidad_fotos <-sqldf("SELECT count(media_type) 'Porcentaje Fotos' FROM aux WHERE  media_type != ''")
+  try(cantidad_fotos <-sqldf("SELECT count(media_type) 'Porcentaje Fotos' FROM aux WHERE  media_type != ''"), silent = TRUE)
   
-  porcentaje_links <- round((cantidad_link/total_filas)*100,3)
-  porcentaje_fotos <- round((cantidad_fotos/total_filas)*100,3)
+  try(porcentaje_links <- round((cantidad_link/total_filas)*100,3), silent = TRUE)
+  try(porcentaje_fotos <- round((cantidad_fotos/total_filas)*100,3), silent = TRUE)
   
-  write.csv(ranking_url,file = paste(carpeta,"Resultados","CaracteristicasTecnicas","Multimedia","RankingUrl.csv",sep = "/"),row.names = FALSE)
-  write.csv(porcentaje_links, file=paste(carpeta,"Resultados","CaracteristicasTecnicas","Multimedia","PorcentajeLink.csv",sep="/"),row.names = FALSE)
-  write.csv(porcentaje_fotos, file=paste(carpeta,"Resultados","CaracteristicasTecnicas","Multimedia","PorcentajeFotos.csv",sep="/"),row.names = FALSE)
+  try(write.csv(ranking_url,file = paste(carpeta,"Resultados","CaracteristicasTecnicas","Multimedia","RankingUrl.csv",sep = "/"),row.names = FALSE), silent = TRUE)
+  try(write.csv(porcentaje_links, file=paste(carpeta,"Resultados","CaracteristicasTecnicas","Multimedia","PorcentajeLink.csv",sep="/"),row.names = FALSE), silent = TRUE)
+  try(write.csv(porcentaje_fotos, file=paste(carpeta,"Resultados","CaracteristicasTecnicas","Multimedia","PorcentajeFotos.csv",sep="/"),row.names = FALSE), silent = TRUE)
   
   # --- Grafico Ranking URLS --- #
   ranking_url <- as.data.frame(ranking_url)
@@ -344,16 +344,16 @@ while(i <= numArchivos)
   # --- EFECTOS Y EXITOS --- #
   # --- CATEGORIZACION--- #
   # --- VALORACION --- #
-  Valoracion <- sqldf("SELECT screen_name as Usuario,
+  try(Valoracion <- sqldf("SELECT screen_name as Usuario,
                 MAX(favorite_count) as Max_favoritos,
                 MIN(favorite_count) as Min_favoritos,
-                AVG(favorite_count) as Promedio FROM aux")
+                AVG(favorite_count) as Promedio FROM aux"), silent = TRUE)
   
-  ValoracionTweet <- sqldf("SELECT  user_id as ID_usuario,
+  try(ValoracionTweet <- sqldf("SELECT  user_id as ID_usuario,
                       MAX(favorite_count) as Max_favoritos,
-                      text as Tweet FROM aux")
+                      text as Tweet FROM aux"), silent = TRUE)
   
-  ValoracionFinal <- sqldf("SELECT * FROM Valoracion, ValoracionTweet")
+  try(ValoracionFinal <- sqldf("SELECT * FROM Valoracion, ValoracionTweet"), silent = TRUE)
   
   write.csv(ValoracionFinal, file = paste(carpeta,"Resultados","Efectos","Valoracion","Valoracion.csv",sep="/" ),row.names = FALSE)
   
