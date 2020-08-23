@@ -11,10 +11,10 @@ Access_Secret<-"5TXmHWG0YwcQaq2g78QD9DKWGszn728QXZAnEpqhxPaDF"
 
 datos<- read.csv("/Users/alfonsoopazom/Downloads/Followers/Cuentas/Libro1.csv", header = TRUE, sep =";",encoding = "UTF-8")
 i=1
-length(datos[,1])
+
 for(i in 1:as.numeric(length(datos[,1]))) {
   Busqueda<-toString(datos$Cuenta[i])
-  tweets1 <- get_followers(Busqueda, n = 10000, retryonratelimit = TRUE)
+  tweets1 <- get_followers(Busqueda, n = 2000000, retryonratelimit = TRUE)
   tweets <- lookup_users(tweets1$user_id)
   tweets<-as.data.frame(tweets)
   largo<-length(tweets[,1])
@@ -34,8 +34,25 @@ for(i in 1:as.numeric(length(datos[,1]))) {
     
     total_seguidores<-sqldf("SELECT count(screen_name) 'Numero de seguidores' FROM tweets")
     cuentas_protegidas<-sqldf("SELECT screen_name Cuenta, protected Protegida FROM tweets WHERE protected!='FALSE'")
-    n_protegidas<-sqldf("SELECT count(protected) 'Porcentaje Cuentas Protegidas' FROM tweets WHERE protected!='FALSE'")
+    n_protegidas<-sqldf("SELECT count(protected) 'Porcentaje'
+                        FROM tweets WHERE protected!='FALSE'")
     porcentaje<-round((n_protegidas/total_seguidores)*100,2)
-    write.csv(porcentaje, file=paste(carpeta,paste0("Cuenta_",datos$Cuenta[i],".csv"), sep = "/") ,row.names=FALSE)
+    cuentas<-datos$Cuenta[i]
+    datos_finales <- cbind(porcentaje,cuentas)
+  
+    archivo_final <- paste(carpeta,"porcentaje.csv",sep = "/")
+    
+    if(file.exists(archivo_final)){
+      lista <- read.csv(archivo_final, header = TRUE)
+      datos_finales <- rbind(datos_finales,lista)
+      write.csv(datos_finales, file=archivo_final,row.names=FALSE)
+    }else{
+      write.csv(datos_finales, file=archivo_final,row.names=FALSE)
+    }
+    
   }
+  print(datos$Cuenta[i])
+  print(total_seguidores)
+  print(n_protegidas)
+  print(porcentaje)
 }
