@@ -22,7 +22,7 @@ nombres = as.data.frame(nombres)
 
 pat ="(RT|via)(((?:\\b\\W*|)@\\w+)+)|,|:|(https|http)://t.co/[A-Za-z\\d]+|&amp;|http\\w*|@\\w+|(\\w+\\.|)\\w+\\.\\w+(/\\w+)*"
 patref ="@[A-Za-z0-9]*[^\\s:_.<]"
-patref2 ='c("[A-Za-z0-9áéíóú]*")'
+patref2 ="[A-Za-z0-9]+"
 patHashtag="#[A-Za-z0-9áéíóú]*"
 pat3 = "[A-Za-z0-9_]+"
 
@@ -33,8 +33,7 @@ if(dir.exists(paste(carpeta, "Resultados", sep = "/")))
 {}else
 {
   dir.create(paste(carpeta, "Resultados", sep = "/"))
-
-  #If para crear los directorios dentro de la carpeta Resultados
+  
   if((dir.exists(paste(carpeta,"Resultados","Evolucion", sep = "/")))
      &(dir.exists(paste(carpeta,"Resultados","Comunidad", sep = "/")))
      &(dir.exists(paste(carpeta,"Resultados","Efectos", sep = "/")))
@@ -47,16 +46,13 @@ if(dir.exists(paste(carpeta, "Resultados", sep = "/")))
     dir.create(paste( carpeta,"Resultados", "Efectos", sep = "/"))
     dir.create(paste( carpeta,"Resultados", "CaracteristicasTecnicas", sep = "/"))
     dir.create(paste( carpeta,"Resultados", "DeterminantesSemanticos", sep = "/"))
-  
-    #if de las carpetas EVOLUCION Y SENTIDO
+
     if((dir.exists(paste(carpeta,"Resultados","Evolucion","Histograma", sep = "/")))
        & (dir.exists(paste(carpeta,"Resultados","Evolucion","Grafico Torta", sep = "/"))))
     {}else
     {
       dir.create(paste(carpeta,"Resultados","Evolucion","Histograma", sep = "/"))
     }
-    
-    # if de las carpetas DETERMINANTES SEMANTICOS
     if((dir.exists(paste( carpeta,"Resultados","DeterminantesSemanticos","Nube", sep = "/")))
        & (dir.exists(paste(carpeta,"Resultados","DeterminantesSemanticos","Bigrama", sep = "/"))))
     {}else
@@ -64,7 +60,6 @@ if(dir.exists(paste(carpeta, "Resultados", sep = "/")))
       dir.create(paste( carpeta,"Resultados", "DeterminantesSemanticos", "Nube", sep = "/"))
       dir.create(paste( carpeta,"Resultados", "DeterminantesSemanticos", "Bigrama", sep = "/"))
     }
-    # if de las carpetas COMUNIDADES 
     if((dir.exists(paste(carpeta,"Resultados","Comunidad","Referentes", sep = "/")))
        & (dir.exists(paste(carpeta,"Resultados","Comunidad","Influenciadores", sep = "/")))
        & (dir.exists(paste(carpeta,"Resultados","Comunidad","Movilizadores", sep = "/")))
@@ -80,7 +75,6 @@ if(dir.exists(paste(carpeta, "Resultados", sep = "/")))
       dir.create(paste(carpeta,"Resultados","Comunidad","Masificadores", sep = "/"))
       dir.create(paste(carpeta,"Resultados","Comunidad","Activistas", sep = "/"))
     }
-    # if de las carpetas EFECTOS Y EXITOS
     if((dir.exists(paste(carpeta,"Resultados","Efectos","Valoracion", sep = "/")))
        & (dir.exists(paste(carpeta,"Resultados","Efectos","Categorizacion", sep = "/")))
        & (dir.exists(paste(carpeta,"Resultados","Efectos","Muestra", sep = "/"))))
@@ -89,9 +83,8 @@ if(dir.exists(paste(carpeta, "Resultados", sep = "/")))
       dir.create(paste(carpeta,"Resultados","Efectos", "Valoracion", sep = "/"))
       dir.create(paste(carpeta,"Resultados","Efectos", "Categorizacion", sep = "/"))
       dir.create(paste(carpeta,"Resultados","Efectos", "Muestra", sep = "/"))
-      
     }
-    # if de las carpetas CARACTERISTICAS TECNICAS 
+     
     if((dir.exists(paste(carpeta,"Resultados","CaracteristicasTecnicas","Caracteres", sep = "/")))
        & (dir.exists(paste(carpeta,"Resultados","CaracteristicasTecnicas","Multimedia", sep = "/")))
        & (dir.exists(paste(carpeta,"Resultados","CaracteristicasTecnicas","Dispositivos", sep = "/")))
@@ -105,54 +98,54 @@ if(dir.exists(paste(carpeta, "Resultados", sep = "/")))
       dir.create(paste(carpeta,"Resultados","CaracteristicasTecnicas","Dispositivos", sep = "/"))
       dir.create(paste(carpeta,"Resultados","CaracteristicasTecnicas","PorcentajeGeoreferencia", sep = "/"))
       dir.create(paste(carpeta,"Resultados","CaracteristicasTecnicas","RankingGeoreferencia", sep = "/"))
-    
     }
   }
 }
-
-
 i = 1
 numArchivos = nrow(nombres)
 
 while(i <= numArchivos)
 {
-  nombre = substr(toString(nombres$nombres[i]),1,(str_length(nombres$nombres[i])-4))
-  nombre_carpeta = paste(carpeta,"Resultados",sep = "/")
-  archivo_temporal = paste(carpeta_base,toString(nombres$nombres[i]),sep="/")
-  nombreResultado = nombres$nombres[i]
+  nombre<-substr(toString(nombres$nombres[i]),1,(str_length(nombres$nombres[i])-4))
+  nombre_carpeta<-paste(carpeta,"Resultados",sep = "/")
+  archivo_temporal<-paste(carpeta_base,toString(nombres$nombres[i]),sep="/")
+  nombreResultado<-nombres$nombres[i]
   #--- Data frame de la base ---#
-  aux <- read.csv(archivo_temporal,header = TRUE,sep = ",",encoding = "UTF-7")
+  aux <- read.csv(archivo_temporal, header = TRUE, sep = ",", encoding = "UTF-8")
   aux <- as.data.frame(aux)
- 
+  
   #--- Arreglo de los tildes ---#
-  aux$hashtags=gsub("\xf1",'ñ',aux$hashtags)#ñ
+  aux$hashtags=gsub("\xf1",'ñ',aux$hashtags)
   aux$hashtags=gsub("\xe1","a",aux$hashtags)#a
-  aux$hashtags=gsub("\xc1",'Á',aux$hashtags)#A
-  aux$hashtags=gsub("\xe9","é",aux$hashtags)#e
-  aux$hashtags=gsub("\xc9","É",aux$hashtags)#E
-  aux$hashtags=gsub("\xed","í",aux$hashtags)#i
-  aux$hashtags=gsub("\xcd","Í",aux$hashtags)#I
-  aux$hashtags=gsub("\xf3",'ó',aux$hashtags)#o
-  aux$hashtags=gsub("\xd3","Ó",aux$hashtags)#O
-  aux$hashtags=gsub("\xda","Ú",aux$hashtags)#U
-  aux$hashtags=gsub("\xfa","ú",aux$hashtags)#u
+  aux$hashtags=gsub("\xc1",'A',aux$hashtags)#A
+  aux$hashtags=gsub("\xe9","e",aux$hashtags)#e
+  aux$hashtags=gsub("\xc9","E",aux$hashtags)#E
+  aux$hashtags=gsub("\xed","i",aux$hashtags)#i
+  aux$hashtags=gsub("\xcd","I",aux$hashtags)#I
+  aux$hashtags=gsub("\xf3",'o',aux$hashtags)#o
+  aux$hashtags=gsub("\xd3","O",aux$hashtags)#O
+  aux$hashtags=gsub("\xda","U",aux$hashtags)#U
+  aux$hashtags=gsub("\xfa","u",aux$hashtags)#u
   aux$hashtags=gsub("\x40","@",aux$hashtags)#@
-  aux$hashtags=gsub("[^0-9A-Za-z///' ]","",aux$hashtags)#@
+  aux$hashtags=gsub("c[()]"," ",aux$hashtags)
+  aux$hashtags=gsub(","," ",aux$hashtags)
+  aux$hashtags=gsub("[^0-9A-Za-z/// ']","",aux$hashtags)
+  aux$text=gsub("[^0-9A-Za-z/// ']","",aux$text)
   
   #--- Eliminacion de tildes ---#
-  aux$text=gsub("á","a",aux$text)
-  aux$text=gsub("é","e",aux$text)
-  aux$text=gsub("í","i",aux$text)
-  aux$text=gsub("ó","o",aux$text)
-  aux$text=gsub("ú","u",aux$text)
+  aux$hashtags=gsub("á","a",aux$hashtags)
+  aux$hashtags=gsub("é","e",aux$hashtags)
+  aux$hashtags=gsub("í","i",aux$hashtags)
+  aux$hashtags=gsub("ó","o",aux$hashtags)
+  aux$hashtags=gsub("ú","u",aux$hashtags)
   # --- Eliminacion de Emojis ---#
   aux$text <-gsub("[^\x30-\x7f]"," ",aux$text)
   
   #Total de filas de la base
   try(total_filas <- sqldf("SELECT count(user_id) total_filas FROM aux"), silent = TRUE)
   
-  # --- Evolucion y Sentido --- #
-  # --- Histograma --- #
+  # --- EVOLUCION Y SENTIDA --- #
+  # --- HISTOGRAMA --- #
   try(histograma <- sqldf('SELECT  SUBSTR(created_at,1,10) FECHA,COUNT(SUBSTR(created_at,1,10)) CANTIDAD  
                        FROM aux 
                        GROUP BY substr(created_at,1,10) 
@@ -161,9 +154,8 @@ while(i <= numArchivos)
   
   try(write.csv(histograma,file <- paste(carpeta,"Resultados","Evolucion","Histograma","histogramax1dia.csv",sep = "/"),row.names=FALSE),silent = TRUE)
 
-  # --- Reproduccion, Produccion, Interaccion --- #
+  # --- REPRODUCCION, PRODUCCION, INTERACCION --- #
   # ===================================================== #
-  #Para encontrar retweet cuya columna tiene valores boolean, si es TRUE se pone = 1 y si es FALSE se pone = 0.
   busqueda_RT = sqldf("SELECT * FROM aux WHERE is_retweet = '1'")
   
   busqueda_RTAI = sqldf("SELECT * FROM busqueda_RT WHERE text NOT LIKE '@%' AND text NOT LIKE 'RT%'")
@@ -187,7 +179,6 @@ while(i <= numArchivos)
   # Grafico Torta #
   total <- sqldf("SELECT * FROM total_AA, total_NART, total_RT, total_RTAI, total_RTNAI,total_filas")
   
-  #Valores para el grafico de Torta.
   AA = total$Arroba
   NART = total$noArrRet
   RT = total$Retweets
@@ -195,7 +186,6 @@ while(i <= numArchivos)
   RTNAI = total$RetweetsNAI
   N = total_filas$total_filas
   
-  #Porcentaje para el grafico.
   RIP = matrix(c(trunc((AA/N)*100*10^2)/10^2,trunc((NART/N)*100*10^2)/10^2,trunc((RT/N)*100*10^2)/10^2,"Interaccion","Produccion","Reproduccion"),ncol = 2)
   colnames(RIP) = c("Porcentaje","Tipo")
   RIP = as.data.frame(RIP)
@@ -209,8 +199,8 @@ while(i <= numArchivos)
   
   try(plotly_IMAGE(p, format = "png", out_file = paste(carpeta,"Resultados","Evolucion","ReproduccionInteraccionProduccion.png",sep="/"),silent = TRUE))
 
-  # --- DETERMINANTES SEMANTICOS--- #
-  # --- NUBE ---#
+  #--- DETERMINANTES SEMANTICOS--- #
+  #--- NUBE ---#
   conectores<-read.csv(paste(carpeta,"conectores.csv",sep = "/"), header = FALSE)
   tempora_nube<-sqldf("SELECT text FROM aux")
   tempora_nube<-mutate(tempora_nube,text = str_replace_all(text,pat, ""))
@@ -224,7 +214,7 @@ while(i <= numArchivos)
   {
     consulta_conectores <- paste0(paste(consulta_conectores,conectores$V1[j],sep = " and word !='"),"'")
   }
-  try(nube <- sqldf(consulta_conectores),outFile = getOption("try.outFile", default = stderr()),silent = TRUE)
+  nube <- sqldf(consulta_conectores)
   write.csv(nube, file = paste(carpeta,"Resultados","DeterminantesSemanticos","Nube","nube.csv",sep = "/"),row.names=FALSE)
   
   # --- BIGRAMA ----#
@@ -267,8 +257,8 @@ while(i <= numArchivos)
   try(write.csv(influenciadores,file <- paste(carpeta,"Resultados","Comunidad","Influenciadores","Influenciadores.csv",sep = "/"),row.names = FALSE), silent = TRUE)
   
   # --- MOVILIZADORES --- #
-  #attempt(hashtags <- str_to_lower(unlist(regmatches(aux$hashtags,gregexpr(pat3,aux$hashtags)))), msg = "Nope", verbose = TRUE)
-  try(hashtags <- str_to_lower(unlist(regmatches(aux$hashtags,gregexpr(pat3,aux$hashtags)))))
+  #attempt(washrags <- str_to_lower(unlist(regmatches(aux$hashtags,gregexpr(pat3,aux$hashtags)))), msg = "Nope", verbose = TRUE)
+  try(hashtags <- str_to_lower(unlist(regmatches(aux$hashtags,gregexpr(patref2,aux$hashtags)))))
   try(hashtags <- as.data.frame(hashtags))
   
   try(ranking_hashtags <- sqldf("SELECT hashtags Hashtag, count(hashtags) Cantidad 
@@ -340,7 +330,6 @@ while(i <= numArchivos)
     layout(title ="Ranking de URL", yaxis = list(title = 'Urls'), xaxis = list(title='Cantidad'))
 
   try(plotly_IMAGE(imagen_ranking, format = "png", out_file = paste(carpeta,"Resultados","CaracteristicasTecnicas","Multimedia","RankingUrl.png",sep = "/")),silent = TRUE)
-  #try(plotly_IMAGE(p, format = "png", out_file = paste(carpeta,"ResultadosGenerales","RankingUrlA.png", sep = "/")),silent = TRUE)
   
   # --- EFECTOS Y EXITOS --- #
   # --- CATEGORIZACION--- #
