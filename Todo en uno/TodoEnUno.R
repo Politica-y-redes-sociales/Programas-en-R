@@ -15,7 +15,7 @@ Sys.setlocale("LC_ALL", "es_ES.UTF-8")
 pat="(RT|via)(((?:\\b\\W*|)@\\w+)+)|,|:|(https|http)://t.co/[A-Za-z\\d]+|&amp;|http\\w*|@\\w+|(\\w+\\.|)\\w+\\.\\w+(/\\w+)*"
 
 memory.limit(9999999999)
-carpeta<-"C:/Users/Ruben/Desktop/ProgramasR/TodoEnUno"
+carpeta<-"/Users/alfonsoopazom/Documents/GitHub/Programas-en-R/Todo en uno"
 carpeta_Bases<-paste(carpeta,"Bases",sep="/")
 nombres<-dir(carpeta_Bases)
 nombres<-as.data.frame(nombres)
@@ -35,6 +35,8 @@ for(i in 2:length(nombres[,1]))
   
   consulta <-read.csv(archivo_temporal,header = TRUE,sep = ",",encoding = "UTF-7")
   consulta<-sqldf('SELECT DISTINCT(status_id),* from consulta')
+  write.csv(consulta, file = paste(nombre_carpeta,"Base-Limpia.csv",sep = "/"),row.names=FALSE)
+  
   consulta<-consulta[,-1]
   consulta$text=gsub("<f1>","?",consulta$text)
   consulta$text=gsub("<e1>","?",consulta$text)
@@ -47,7 +49,6 @@ for(i in 2:length(nombres[,1]))
   consulta$text=gsub("<fa>","?",consulta$text)
   
   ###### Muestra ########
-  
   largo<-length(consulta[,1])
   aleatorios <- as.data.frame(sample(1:10000000, largo, replace=TRUE))
   colnames(aleatorios)<-c("numeros")
@@ -69,12 +70,16 @@ for(i in 2:length(nombres[,1]))
   influenciadores<-""
   twiteros<-""
   
-  
   ####### HISTOGRAMA ###########
   
-  histograma <- sqldf(' select  substr(created_at,1,10) FECHA,count(substr(created_at,1,10)) CANTIDAD  from consulta group by substr(created_at,1,10) ORDER BY substr(created_at,1,10) DESC')
+  histograma <- sqldf("select substr(created_at,1,10) FECHA, count(substr(created_at,1,10)) CANTIDAD 
+                      from consulta 
+                      group by FECHA 
+                      ORDER BY substr(created_at,1,10) 
+                      DESC")
   write.csv(histograma,file = paste(nombre_carpeta,"1dia.csv",sep = "/"),row.names=FALSE)
   histograma<-""
+  
   ######## NUBE #############
   conectores<-read.csv(paste(carpeta,"conectores.csv",sep = "/"), header = FALSE)
   consulta<-sqldf("select text from consulta")
