@@ -29,9 +29,13 @@ for (i in nombresBases[,1]) {
   cuentasPrensa <- as.data.frame(cuentasPrensa)
   view(cuentasPrensa)
   
-    query <- paste('select screen_name,text FROM cuentasPrensa INNER JOIN file ON cuentasPrensa.nombre = file.screen_name where cuentasPrensa.Carpeta = "Prensa" ')
+    query <- paste('select screen_name as usuario,text as tweet FROM cuentasPrensa INNER JOIN file ON cuentasPrensa.nombre = file.screen_name where cuentasPrensa.Carpeta = "Prensa" ')
     tweets <- sqldf(query)
     tweets <- as.data.frame(tweets);
+    query1 <- paste('SELECT screen_name as usuario, count(text) as cantidad FROM cuentasPrensa join file on cuentasPrensa.nombre = file.screen_name where cuentasPrensa.Carpeta = "Prensa" group by screen_name')
+    contador <- sqldf(query1)
+    print(contador)
     view(tweets)
+    write.csv(contador,file = paste(carpetaResultado,i,sep='/cantidad '))
     write.csv(tweets,file = paste(carpetaResultado,i,sep='/'))
 }
