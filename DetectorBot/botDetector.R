@@ -36,6 +36,7 @@ if(dir.exists(paste(carpeta, "Resultados", sep = "/")))
 
 numArchivos = nrow(cuentas)
 i=1
+
 while(i <= numArchivos)
 {
   nombre = substr(toString(cuentas$cuentas),1,(str_length(cuentas$cuentas)-4))
@@ -86,11 +87,18 @@ while(i <= numArchivos)
   tabla = as.data.frame(tabla)
   write.csv(tabla, file = paste(CarpetaResultados,'PorcentajeParcialesBot.csv.csv',sep = "/"),row.names=FALSE)
   
-  #Apilamiento de columnas 
-  tabla_final <- rbind.fill(descripcion,localizacion,cuenta)
+  #Columnas con las probables cuentas
+  des <- as.data.frame(descripcion$cuenta)
+  loc <- as.data.frame(localizacion$cuenta)
+  cuen <- as.data.frame(cuenta$Cuentas)
+  ret <-as.data.frame( retweet$cuenta)
+  
+  #Apilamiento de todas la filas
+  tabla_final <- rbind.fill(des,loc,cuen,ret)
   tabla_final <- as.data.frame(tabla_final)
-  #Sumatoria de todas las cuentas sospechosa
-  final <- sqldf(" SELECT DISTINCT(cuenta) FROM tabla_final")
+  
+  #Limpieza de las cuentas repetidas
+  final <- sqldf(" SELECT DISTINCT(descripcion$cuenta) FROM tabla_final")
   numero_finalRT <- sqldf("SELECT count(*) 'Porcentaje de Bots' FROM final")
   total <- round((numero_finalRT/total_filas)*100,2)
   write.csv(total, file = paste(CarpetaResultados,'PorcentajeBotenBase.csv',sep = "/"),row.names=FALSE)
