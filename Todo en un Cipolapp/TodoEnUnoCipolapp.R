@@ -115,18 +115,18 @@ while(i <= numArchivos)
   aux <- as.data.frame(aux)
   
   #--- Arreglo de los tildes ---#
-  aux$text=gsub("<f1>",'ñ',aux$text)
-  aux$text=gsub("<e1>","a",aux$text)#a
-  aux$text=gsub("<c1>",'A',aux$text)#A
-  aux$text=gsub("<e9>","e",aux$text)#e
-  aux$text=gsub("<c9>","E",aux$text)#E
-  aux$text=gsub("<ed>","i",aux$text)#i
-  aux$text=gsub("<cd>","I",aux$text)#I
-  aux$text=gsub("<f3>",'o',aux$text)#o
-  aux$text=gsub("<d3>","O",aux$text)#O
-  aux$text=gsub("<da>","U",aux$text)#U
-  aux$text=gsub("<fa>","u",aux$text)#u
-  aux$text=gsub("<40>","@",aux$text)#@
+  #aux$text=gsub("<f1>",'ñ',aux$text)
+  #aux$text=gsub("<e1>","a",aux$text)#a
+  #aux$text=gsub("<c1>",'A',aux$text)#A
+  #aux$text=gsub("<e9>","e",aux$text)#e
+  #aux$text=gsub("<c9>","E",aux$text)#E
+  #aux$text=gsub("<ed>","i",aux$text)#i
+  #aux$text=gsub("<cd>","I",aux$text)#I
+  #aux$text=gsub("<f3>",'o',aux$text)#o
+  #aux$text=gsub("<d3>","O",aux$text)#O
+  #aux$text=gsub("<da>","U",aux$text)#U
+  #aux$text=gsub("<fa>","u",aux$text)#u
+  #aux$text=gsub("<40>","@",aux$text)#@
   
   #Formato String 
   aux$hashtags=gsub("c[()]"," ",aux$hashtags)
@@ -135,13 +135,13 @@ while(i <= numArchivos)
   #aux$text=gsub("[^0-9A-Za-z/// ']","",aux$text)
   
   #--- Eliminacion de tildes ---#
-  aux$hashtags=gsub("á","a",aux$hashtags)
-  aux$hashtags=gsub("é","e",aux$hashtags)
-  aux$hashtags=gsub("í","i",aux$hashtags)
-  aux$hashtags=gsub("ó","o",aux$hashtags)
-  aux$hashtags=gsub("ú","u",aux$hashtags)
+  #aux$hashtags=gsub("á","a",aux$hashtags)
+  #aux$hashtags=gsub("é","e",aux$hashtags)
+  #aux$hashtags=gsub("í","i",aux$hashtags)
+  #aux$hashtags=gsub("ó","o",aux$hashtags)
+  #aux$hashtags=gsub("ú","u",aux$hashtags)
   # --- Eliminacion de Emojis ---#
-  aux$text <-gsub("[^\x30-\x7f]"," ",aux$text)
+  #aux$text <-gsub("[^\x30-\x7f]"," ",aux$text)
   
   #Total de filas de la base
   try(total_filas <- sqldf("SELECT count(user_id) total_filas FROM aux"), silent = TRUE)
@@ -243,7 +243,7 @@ while(i <= numArchivos)
                       FROM referentes
                       GROUP BY Cuenta
                       ORDER BY Menciones
-                      DESC LIMIT 250"), silent = TRUE)
+                      DESC LIMIT 50"), silent = TRUE)
   
   try(write.csv(referentes, file = paste(carpeta,"Resultados","Comunidad","Referentes","referentes.csv",sep = "/"),row.names=FALSE), silent = TRUE)
   
@@ -253,7 +253,7 @@ while(i <= numArchivos)
                       WHERE is_retweet 
                       GROUP BY retweet_screen_name 
                       ORDER BY COUNT(retweet_screen_name) DESC
-                      LIMIT 250"), silent =TRUE)
+                      LIMIT 50"), silent =TRUE)
   
   try(write.csv(influenciadores,file <- paste(carpeta,"Resultados","Comunidad","Influenciadores","Influenciadores.csv",sep = "/"),row.names = FALSE), silent = TRUE)
   
@@ -266,7 +266,7 @@ while(i <= numArchivos)
                             FROM hashtags
                             GROUP BY Hashtag
                             ORDER BY Cantidad
-                            DESC LIMIT 250"))
+                            DESC LIMIT 50"))
   
   try(cantidad_hashtag <- sqldf("SELECT count(hashtags) 'Porcentaje Hashtags'
                             FROM aux WHERE hashtags!=''"),silent = TRUE)
@@ -301,7 +301,7 @@ while(i <= numArchivos)
                 FROM aux WHERE is_retweet = 0 
                 GROUP BY screen_name 
                 ORDER BY count(screen_name) 
-                DESC LIMIT 250'), silent = TRUE)
+                DESC LIMIT 50'), silent = TRUE)
   try(write.csv(activistas, file = paste(carpeta,"Resultados","Comunidad","Activistas","Activistas.csv",sep = "/"),row.names = FALSE),silent = TRUE)
   
   # --- CONTENIDO MULTIMEDIA --- #
